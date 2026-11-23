@@ -1,0 +1,93 @@
+import { useShallow } from 'zustand/react/shallow'
+import { cubeLocationFromCuboidValues, useDrawingStore } from '@/drawing/DrawingStoreHook.ts'
+import { OrthographicView } from './OrthographicView.tsx'
+import { rotate, updateMinMax } from '@/util.ts'
+
+export type OrthographicViewsProps = {
+  /**
+   * Whether the orthographic views are split to three different SVGs if the
+   * store specifies a split. This is useful for display as the split variant
+   * does not layout its images. Defaults to false.
+   */
+  isSplittable?: boolean
+}
+
+/**
+ * Combined layout of orthographic views.
+ * This places the views according to the specification and wrap them in a single SVG.
+ *
+ * Screenshot:
+ *
+ * ![screenshot](screenshots/OrthographicViews.png)
+ */
+export function OrthographicViews({ isSplittable }: OrthographicViewsProps) {
+  const [
+    shouldSplitOrthographicViewsAsThree,
+    shouldShowOrthographicViewsGrid,
+    shouldShowOrthographicStructure,
+    cuboidValues,
+    rotation
+  ] = useDrawingStore(useShallow((state) => [
+    state.shouldSplitOrthographicViewsAsThree,
+    state.shouldShowOrthographicViewsGrid,
+    state.shouldShowOrthographicStructure,
+    state.cuboidValues,
+    state.rotation
+  ]))
+
+  let coordinates = cubeLocationFromCuboidValues(cuboidValues).map(({ cuboidIndex, ...rest }) => rest)
+  coordinates = rotate(coordinates, rotation)
+
+  // limits for calculating size which is used for spacing out the views
+  const minMaxCoordinates = { x: { min: Infinity, max: -Infinity }, y: { min: Infinity, max: -Infinity }, z: { min: Infinity, max: -Infinity } }
+  for (const { ...rest } of coordinates) updateMinMax(minMaxCoordinates, rest)
+
+  // size is difference in coordinates add one
+  const size = {
+    x: minMaxCoordinates.x.max - minMaxCoordinates.x.min + 1,
+    y: minMaxCoordinates.y.max - minMaxCoordinates.y.min + 1,
+    z: minMaxCoordinates.z.max - minMaxCoordinates.z.min + 1
+  }
+
+  // using circles as the rasterizer does not rasterize pattern correctly
+  const gridPoints = []
+  for (let cx = 0; cx <= size.x + 2 + size.z; cx++) {
+    for (let cy = 0; cy <= size.z + 2 + size.y; cy++) {
+      gridPoints.push(<circle cx={cx} cy={cy} r={0.1} fill='black' />)
+    }
+  }
+
+  // splitting does not layout the views so it is only used for exporting
+  return (isSplittable ?? false) && shouldSplitOrthographicViewsAsThree ? (
+    <>
+      <svg viewBox={`-1 -1 ${size.x + 2} ${size.z + 2}`} data-export-name='orthotop'>
+        <OrthographicView from='y' coordinates={coordinates} offsetX={0} offsetY={0} />
+      </svg>
+      <svg viewBox={`-1 -1 ${size.x + 2} ${size.y + 2}`} data-export-name='orthofront'>
+        <OrthographicView from='z' coordinates={coordinates} offsetX={0} offsetY={0} />
+      </svg>
+      <svg viewBox={`-1 -1 ${size.z + 2} ${size.y + 2}`} data-export-name='orthoside'>
+        <OrthographicView from='x' coordinates={coordinates} offsetX={0} offsetY={0} />
+      </svg>
+    </>
+  ) : (
+    // padding of 2 between views and margins of 1 (sum of 2 for both sides) to the edges
+    <svg
+      width='100%'
+      height='100%'
+      viewBox={`-1 -1 ${size.x + size.z + 2 + 2} ${size.z + size.y + 2 + 2}`}
+      data-export-name='ortho'
+    >
+      {shouldShowOrthographicViewsGrid && !shouldSplitOrthographicViewsAsThree ? <>{...gridPoints}</> : null}
+      {
+        shouldShowOrthographicStructure || shouldSplitOrthographicViewsAsThree ? (
+          <>
+            <OrthographicView from='y' coordinates={coordinates} offsetX={0} offsetY={0} />
+            <OrthographicView from='z' coordinates={coordinates} offsetX={0} offsetY={size.z + 2} />
+            <OrthographicView from='x' coordinates={coordinates} offsetX={size.x + 2} offsetY={size.z + 2} />
+          </>
+        ) : null
+      }
+    </svg>
+  )
+}

@@ -1,0 +1,483 @@
+/* ============================================================
+   STEM SPACE — Isometric Drawing Toolkit
+   Issue #8: Adding CSS (child-friendly Explore layout)
+   ------------------------------------------------------------
+   Design tokens pulled from Figma (susie's Explore frames):
+   - Background      #F7F8FC
+   - Primary purple  #6D5EF8   (buttons / active state)
+   - Text dark       #28334D   (titles / body)
+   - Border grey     #CBD3E3   (borders / secondary)
+   - White           #FFFFFF   (cards)
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. Design tokens
+   ------------------------------------------------------------ */
+:root {
+  /* color */
+  --bg:            #F7F8FC;
+  --surface:       #FFFFFF;
+  --primary:       #6D5EF8;
+  --primary-hover: #5A4AD6;
+  --primary-soft:  #ECE9FF;
+  --text:          #28334D;
+  --text-muted:    #6B7688;
+  --border:        #CBD3E3;
+
+  /* typography */
+  --font-round: 'Nunito', 'Baloo 2', 'Comic Sans MS', 'Segoe UI', system-ui, sans-serif;
+  --fs-card-title: 1.02rem;
+  --fs-card-sub:   0.78rem;
+  --fs-body:    0.95rem;
+  --fs-btn:     0.9rem;
+
+  /* shape */
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-btn: 10px;
+
+  /* spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 22px;
+
+  /* shadow */
+  --shadow-card: 0 6px 18px rgba(40, 51, 77, 0.08);
+  --shadow-btn:  0 3px 8px rgba(109, 94, 248, 0.25);
+  --shadow-menu: 0 8px 24px rgba(40, 51, 77, 0.15);
+
+  /* breakpoints */
+  --bp-narrow: 48rem;     /* 768px — below this: single column fallback */
+}
+
+/* ------------------------------------------------------------
+   2. Base
+   ------------------------------------------------------------ */
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: auto;
+}
+
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-round);
+  font-size: var(--fs-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font-family: inherit;
+  font-size: var(--fs-btn);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------
+   3. Top bar
+   ------------------------------------------------------------ */
+.app-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-xl);
+  background-color: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+
+.app-topbar__logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 0.02em;
+}
+
+.app-topbar__nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.app-topbar__nav-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-btn);
+  font-weight: 700;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.app-topbar__nav-btn:hover {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+.app-topbar__nav-btn.is-active {
+  background-color: var(--primary);
+  color: #FFFFFF;
+}
+
+/* ------------------------------------------------------------
+   4. Three view cards — grid areas
+       a = 3D Object (left, tall)
+       b = Isometric Drawing (right top)
+       c = Coded Plan (right bottom)
+       Default order: a left, b top-right, c bottom-right.
+       `cards--focused` swaps a and b (Isometric takes the large left).
+   ------------------------------------------------------------ */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "a b"
+    "a c";
+  gap: var(--space-lg);
+  padding: var(--space-lg) var(--space-xl) var(--space-xl);
+  height: calc(100vh - 5.5rem);   /* fill the space below the topbar */
+  min-height: 28rem;
+}
+
+.cards--focused {
+  grid-template-areas:
+    "b a"
+    "b c";
+}
+
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card--3d  { grid-area: a; }
+.card--iso { grid-area: b; }
+.card--plan { grid-area: c; }
+
+/* card header is clickable on the swap cards (swap with the other one) */
+.card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0;
+  color: var(--text);
+}
+
+button.card__header:hover .card__title {
+  color: var(--primary);
+}
+
+.card__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.card__title {
+  margin: 0;
+  font-size: var(--fs-card-title);
+  font-weight: 800;
+  color: var(--text);
+  transition: color 0.15s ease;
+}
+
+.card__swap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+button.card__header:hover .card__swap {
+  background-color: var(--primary);
+  color: #FFFFFF;
+}
+
+.card__subtitle {
+  margin: 0;
+  font-size: var(--fs-card-sub);
+  color: var(--text-muted);
+}
+
+.card__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   5. Toolbar (Pen / Eraser / Undo / Delete)
+   ------------------------------------------------------------ */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 var(--space-md);
+  border: 2px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-btn);
+  font-weight: 700;
+  transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.toolbar__btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background-color: var(--primary-soft);
+}
+
+.toolbar__btn.is-active {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: #FFFFFF;
+}
+
+.toolbar__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar__label {
+  align-self: center;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0 var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   6. Primary button
+   ------------------------------------------------------------ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-xl);
+  background-color: var(--primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-weight: 800;
+  box-shadow: var(--shadow-btn);
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* ------------------------------------------------------------
+   7. Viewport containers
+   ------------------------------------------------------------ */
+.viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--bg);
+  overflow: hidden;
+}
+
+.viewport__hint {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* "Reset camera" button — floats over the top edge of the 3D viewport
+   so it does not steal space from the model. */
+.view3d-top {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-md);
+  z-index: 5;
+}
+
+.view3d-top__reset {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 var(--space-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-btn);
+  background-color: var(--surface);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.view3d-top__reset:hover {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* rotation controls (X / Y / Z) */
+.rotation-pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 40px;
+  gap: var(--space-sm);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+}
+
+.rotation-pad button {
+  border: none;
+  border-radius: var(--radius-btn);
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+/* ------------------------------------------------------------
+   8. Advanced tools (developer features, kept & collapsible)
+   ------------------------------------------------------------ */
+.advanced {
+  margin: var(--space-lg) var(--space-xl);
+  padding: var(--space-md);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--bg);
+}
+
+.advanced summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.advanced__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   9. Dialogs (Bootstrap modal — kept)
+   ------------------------------------------------------------ */
+.modal-dialog {
+  max-width: none;
+  width: 90%;
+  height: 90%;
+}
+
+.modal-body {
+  min-height: 60vh;
+}
+
+.preview {
+  height: 9rem;
+  border: 2px solid black;
+}
+
+/* ------------------------------------------------------------
+   10. Responsive
+   ------------------------------------------------------------
+   - Desktop landscape & iPad landscape → 3-column with swap
+   - iPad portrait → 3-column with swap (tighter)
+   - Narrow windows (<768px) → single column fallback
+   ------------------------------------------------------------ */
+
+/* iPad portrait: tighten spacing, keep the a/b/c 3-column layout */
+@media (orientation: portrait) and (min-width: 48rem) {
+  .app-topbar {
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-md);
+  }
+  .app-topbar__logo { font-size: 1.2rem; }
+  .cards {
+    padding: var(--space-md);
+    gap: var(--space-md);
+    grid-template-columns: 0.9fr 1.1fr;
+    height: calc(100vh - 5rem);
+    min-height: 30rem;
+  }
+  .card { padding: var(--space-md); }
+  .card__title { font-size: 1.15rem; }
+}
+
+/* Narrow windows (<768px): single column fallback, even in landscape */
+@media (max-width: 47.999rem) {
+  .cards {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "a"
+      "b"
+      "c";
+    height: auto;
+    padding: var(--space-md);
+  }
+
+  .cards--focused {
+    grid-template-areas:
+      "b"
+      "a"
+      "c";
+  }
+
+  .viewport {
+    min-height: 40vh;
+  }
+
+  .app-topbar {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+  }
+}
