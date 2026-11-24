@@ -16,6 +16,7 @@ import { IsometricViewport3D } from './drawing/3d/IsometricViewport3D.tsx'
 import { OrthographicControls } from './drawing/control/OrthographicControls.tsx'
 import { OrthographicEditorDialog } from './dialog/OrthographicEditorDialog.tsx'
 import { OrthographicViews } from './drawing/auxiliary/OrthographicViews.tsx'
+import { ResetConfirmDialog } from './dialog/ResetConfirmDialog.tsx'
 import { RotationButtons } from './drawing/control/RotationButtons.tsx'
 import { StoreDrawingControls } from './drawing/StoreDrawingControls.tsx'
 import { defaultDrawingDefinition, useStore } from './Store.tsx'
@@ -67,6 +68,7 @@ function App() {
   const [isDrawingsDialogOpen, setIsDrawingsDialogOpen] = useState(false)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [orthographicEditorDefinitionIndex, setOrthographicEditorDefinitionIndex] = useState<number|null>(null)
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
 
   // toggle swap between 3D object and isometric drawing cards
   const toggleFocus = () => setIsDrawingFocused((focused) => !focused)
@@ -115,6 +117,13 @@ function App() {
                 onClick={() => setHighlightKind('cuboid')}
               >
                 Delete
+              </button>
+              <button
+                className='toolbar__btn'
+                type='button'
+                onClick={() => setIsResetDialogOpen(true)}
+              >
+                Reset structure
               </button>
             </div>
             <div className='viewport'>
@@ -244,6 +253,11 @@ function App() {
       <OrthographicEditorDialog
         definitionIndex={orthographicEditorDefinitionIndex}
         setDefinitionIndex={setOrthographicEditorDefinitionIndex}
+      />
+      <ResetConfirmDialog
+        isOpen={isResetDialogOpen}
+        close={() => setIsResetDialogOpen(false)}
+        onConfirm={() => setAppInitialDefinition(defaultDrawingDefinition())}
       />
     </DrawingProvider>
   )

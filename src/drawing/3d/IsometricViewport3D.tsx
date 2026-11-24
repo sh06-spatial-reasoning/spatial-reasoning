@@ -4,7 +4,7 @@ import type { InstancedMesh, Object3D } from 'three'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { cubeLocationFromCuboidValues, useDrawingStore } from '@/drawing/DrawingStoreHook.ts'
-import { calculateEdgesMap } from './Renderer3D.ts'
+import { calculateEdgesAll } from './Renderer3D.ts'
 
 export type IsometricViewport3DProps = {
   /** Placeholder node to use while the libraries are loading. */
@@ -66,7 +66,7 @@ function GroupObject({ three, fiber }: Pick<DynamicImports, 'three' | 'fiber'>) 
   })
 
   const edges = []
-  for (const [start, end] of calculateEdgesMap(cubeLocationFromCuboidValues(cuboidValues))) {
+  for (const [start, end] of calculateEdgesAll(cubeLocationFromCuboidValues(cuboidValues))) {
     // the mesh needs to be offset as the position uses the center as anchor
     // offset by 0.5 as the coordinates systems differ
     // `max` and `abs` as two axes will be zero size for an edge, set that to 0.05
@@ -95,7 +95,7 @@ function GroupObject({ three, fiber }: Pick<DynamicImports, 'three' | 'fiber'>) 
           const { x, y, z, dx, dy, dz } = cuboidValue
           return (
             <mesh position={[x + dx / 2, y + dy / 2, z + dz / 2]}>
-              <boxGeometry args={[dx + 0.01, dy + 0.01, dz + 0.01]} />
+              <boxGeometry args={[dx - 0.05, dy - 0.05, dz - 0.05]} />
               <meshBasicMaterial color='white' />
             </mesh>
           )

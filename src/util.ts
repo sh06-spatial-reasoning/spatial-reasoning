@@ -39,10 +39,13 @@ export function isValidColumn(yValues: Array<number>) : boolean {
  * @param cuboids - array of all the cuboids from the store
  * @returns array - the array of y values in the column
  */
+
+/*
 function getColumnYValues(target: CuboidValue, cuboids: CuboidValue[]) : Array<number> {
 	const arr_XZ: CuboidValue[] = cuboids.filter(c => c.z ===target.z && c.x === target.x)
 	return arr_XZ.map(c => c.y)
 }
+*/
 
 /**
  * check if adding is valid at target
@@ -52,9 +55,11 @@ function getColumnYValues(target: CuboidValue, cuboids: CuboidValue[]) : Array<n
  */
 export function canAddCuboid(target: CuboidValue, cuboids: CuboidValue[]): boolean {
   if (cuboids.length >= MAX_CUBES) return false
-	const column: Array<number> = getColumnYValues(target, cuboids)
-	column.push(target.y)
-	return isValidColumn(column)
+  void target;
+	/* const column: Array<number> = getColumnYValues(target, cuboids)
+	column.push(target.y) 
+	return isValidColumn(column) */
+  return true
 }
 
 /**
@@ -65,8 +70,10 @@ export function canAddCuboid(target: CuboidValue, cuboids: CuboidValue[]): boole
  */
 export function canRemoveCuboid(target: CuboidValue, cuboids: CuboidValue[]) : boolean {
 	if (cuboids.length <= 1) return false
-  const column = getColumnYValues(target, cuboids)
-  return isValidColumn(column.filter((y) => y !== target.y))
+  void target;
+  /* const column = getColumnYValues(target, cuboids)
+  return isValidColumn(column.filter((y) => y !== target.y)) */
+  return true
 }
 
 /** Coordinates that have extra keys which are ignored by the functions operating on them. */

@@ -5,7 +5,7 @@ import { DrawingProvider } from "../src/drawing/DrawingStore";
 import { IsometricStructure } from "../src/drawing/isometric/foreground/IsometricStructure";
 import { defaultDrawingDefinition } from "../src/Store";
 
-test("two adjacent cubes results in 10 triangular faces and 14 edges", async () => {
+test("two adjacent cubes results in 10 triangular faces and 12 edges", async () => {
   const screen = await render(
     <DrawingProvider initialDefinition={defaultDrawingDefinition()}>
       <svg>
@@ -20,7 +20,7 @@ test("two adjacent cubes results in 10 triangular faces and 14 edges", async () 
     </DrawingProvider>,
   );
 
-  expect(screen.asFragment().children[0].childElementCount).toBe(10 + 14);
+  expect(screen.asFragment().children[0].childElementCount).toBe(10 + 12);
 });
 
 test("two overlapping cubes results in 6 triangular faces and 9 edges", async () => {

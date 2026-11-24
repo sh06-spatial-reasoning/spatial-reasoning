@@ -95,12 +95,12 @@ export function IsometricStructure({
       const diffY = otherY - y;
       const diffZ = otherZ - z;
 
+      const adjcentAxis = getAdjacentAxis(diffX, diffY, diffZ);
+      if (adjcentAxis !== null) cullFaceSet.add(adjcentAxis);
+      
       const minDiffXYZ = Math.min(diffX, diffY, diffZ);
       // no planar movement can obscure the cube if the other cube is behind in any axis
       if (minDiffXYZ < 0) continue;
-
-      const adjcentAxis = getAdjacentAxis(diffX, diffY, diffZ);
-      if (adjcentAxis !== null) cullFaceSet.add(adjcentAxis);
 
       // projected relative coordinates, this will be just in front of the cube if the other cube obscures it
       const obscureNormalizedX = diffX - minDiffXYZ;
